@@ -21,9 +21,13 @@
     "verify:desktop": "npm run build:desktop-ui && cargo fmt --manifest-path ../desktop/Cargo.toml --check && cargo test --manifest-path ../desktop/Cargo.toml --all-targets && cargo clippy --manifest-path ../desktop/Cargo.toml --all-targets -- -D warnings",
     "verify": "npm run verify:web && npm run verify:desktop",
     "preview:web": "vite preview --mode web",
-    "tauri": "cd ../desktop && tauri"
+    "tauri": "cd ../desktop && tauri",
+    "android:sync": "npm run build:web && npx cap sync android",
+    "android:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-router": "^1.170.29",
     "@tauri-apps/api": "^2.11.1",
@@ -40,6 +44,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2.11.4",
     "@types/node": "^26.1.1",

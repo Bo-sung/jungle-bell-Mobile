@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/laundryDetailRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bell_widget_background"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_laundry_detail_title"
+            android:textColor="@color/bell_widget_title"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tvLaundryDetailDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/bell_widget_secondary"
+            android:textSize="11sp"
+            android:maxLines="1"
+            tools:text="9/6(일)" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvLaundryDetailSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="세탁기 6/9 · 건조기 1/9 · 2분 남음" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 1  세탁 ○ · 건조 32분" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 2  세탁 33분 · 건조 9분" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 3  세탁 76분 · 건조 81분" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 4  세탁 마무리 · 건조 70분" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 5  세탁 13분 · 건조 56분" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 6  세탁 마무리 · 건조 10분" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 7  세탁 62분 · 건조 ○" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 8  세탁 ○ · 건조 24분" />
+
+    <TextView
+        android:id="@+id/laundryDetailRow9"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:textColor="@color/bell_widget_body"
+        android:textSize="11sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="워시타워 9  세탁 ○ · 건조 ✕" />
+</LinearLayout>

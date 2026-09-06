@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/washTowerRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bell_widget_background"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="5dp">
+
+    <!-- Compact title + date -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_wash_tower_title"
+            android:textColor="@color/bell_widget_title"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tvWashTowerDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/bell_widget_secondary"
+            android:textSize="9sp"
+            android:maxLines="1"
+            tools:text="9/6(일)" />
+    </LinearLayout>
+
+    <!-- Header row: tower numbers -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_wash_tower_device"
+            android:textColor="@color/bell_widget_secondary"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:maxLines="1" />
+
+        <TextView android:id="@+id/wtHead1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="1" />
+        <TextView android:id="@+id/wtHead2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="2" />
+        <TextView android:id="@+id/wtHead3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="3" />
+        <TextView android:id="@+id/wtHead4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="4" />
+        <TextView android:id="@+id/wtHead5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="5" />
+        <TextView android:id="@+id/wtHead6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_common_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="6" />
+        <TextView android:id="@+id/wtHead7" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_common_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="7" />
+        <TextView android:id="@+id/wtHead8" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_women_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="8" />
+        <TextView android:id="@+id/wtHead9" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:textColor="@color/bell_cell_women_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="9" />
+    </LinearLayout>
+
+    <!-- Dryer row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:text="@string/widget_wash_tower_dryer"
+            android:textColor="@color/bell_widget_secondary"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:maxLines="1" />
+
+        <TextView android:id="@+id/wtDry1" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:32" />
+        <TextView android:id="@+id/wtDry2" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:09" />
+        <TextView android:id="@+id/wtDry3" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="01:21" />
+        <TextView android:id="@+id/wtDry4" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="01:10" />
+        <TextView android:id="@+id/wtDry5" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:56" />
+        <TextView android:id="@+id/wtDry6" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:10" />
+        <TextView android:id="@+id/wtDry7" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="✓" />
+        <TextView android:id="@+id/wtDry8" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:24" />
+        <TextView android:id="@+id/wtDry9" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_error_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="!" />
+    </LinearLayout>
+
+    <!-- Washer row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:text="@string/widget_wash_tower_washer"
+            android:textColor="@color/bell_widget_secondary"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:maxLines="1" />
+
+        <TextView android:id="@+id/wtWas1" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="✓" />
+        <TextView android:id="@+id/wtWas2" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:33" />
+        <TextView android:id="@+id/wtWas3" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="01:16" />
+        <TextView android:id="@+id/wtWas4" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:00" />
+        <TextView android:id="@+id/wtWas5" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:13" />
+        <TextView android:id="@+id/wtWas6" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="00:00" />
+        <TextView android:id="@+id/wtWas7" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_busy_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="01:02" />
+        <TextView android:id="@+id/wtWas8" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="✓" />
+        <TextView android:id="@+id/wtWas9" android:layout_width="0dp" android:layout_height="22dp" android:layout_weight="1" android:layout_marginStart="1dp" android:layout_marginEnd="1dp" android:gravity="center" android:textColor="@color/bell_cell_men_text" android:textSize="9sp" android:textStyle="bold" android:maxLines="1" tools:text="✓" />
+    </LinearLayout>
+</LinearLayout>

@@ -95,12 +95,32 @@ export function createPwaCapabilityAdapter(options: {
     };
 }
 
+interface CapacitorGlobal {
+    isNativePlatform?(): boolean;
+    getPlatform?(): string;
+}
+
+interface CapacitorWindow extends Window {
+    Capacitor?: CapacitorGlobal;
+}
+
 function installedPwa(windowObject: Window, navigatorObject: Navigator): boolean {
     const standaloneDisplay =
         typeof windowObject.matchMedia === 'function' &&
         windowObject.matchMedia('(display-mode: standalone)').matches;
     const iosStandalone = 'standalone' in navigatorObject && navigatorObject.standalone === true;
-    return standaloneDisplay || iosStandalone;
+    // The Capacitor shell is the installed mobile companion app itself: it
+    // hosts the production site in a native WebView, so it must be treated
+    // like an installed PWA (cookie companion auth, pairing code entry).
+    const capacitorNative = isCapacitorNative(windowObject);
+    return standaloneDisplay || iosStandalone || capacitorNative;
+}
+
+function isCapacitorNative(windowObject: Window): boolean {
+    const capacitor = (windowObject as CapacitorWindow).Capacitor;
+    if (!capacitor) return false;
+    if (typeof capacitor.isNativePlatform === 'function') return capacitor.isNativePlatform();
+    return typeof capacitor.getPlatform === 'function' && capacitor.getPlatform() !== 'web';
 }
 
 function installPrompt(event: BeforeInstallPromptEvent): PwaInstallPrompt {

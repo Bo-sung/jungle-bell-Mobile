@@ -67,6 +67,43 @@ describe('PwaCapabilityAdapter', () => {
         ).toBe(true);
     });
 
+    it('Capacitor 네이티브 셸을 설치형 companion로 인식한다', () => {
+        const browser = browserObjects();
+        const capacitorViaIsNative = Object.assign(browser.windowObject, {
+            Capacitor: {isNativePlatform: () => true},
+        }) as unknown as Window;
+        const capacitorViaPlatform = Object.assign(new EventTarget(), {
+            matchMedia: () => ({matches: false}),
+            Capacitor: {getPlatform: () => 'android'},
+        }) as unknown as Window;
+        const capacitorWeb = Object.assign(new EventTarget(), {
+            matchMedia: () => ({matches: false}),
+            Capacitor: {getPlatform: () => 'web'},
+        }) as unknown as Window;
+
+        expect(
+            createPwaCapabilityAdapter({
+                production: true,
+                windowObject: capacitorViaIsNative,
+                navigatorObject: browser.navigatorObject,
+            }).installed,
+        ).toBe(true);
+        expect(
+            createPwaCapabilityAdapter({
+                production: true,
+                windowObject: capacitorViaPlatform,
+                navigatorObject: browser.navigatorObject,
+            }).installed,
+        ).toBe(true);
+        expect(
+            createPwaCapabilityAdapter({
+                production: true,
+                windowObject: capacitorWeb,
+                navigatorObject: browser.navigatorObject,
+            }).installed,
+        ).toBe(false);
+    });
+
     it('production web에서 load 이후에만 서비스 워커를 등록한다', async () => {
         const browser = browserObjects();
         const adapter = createPwaCapabilityAdapter({

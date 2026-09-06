@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bell_widget_background">#F5F6F8</color>
+    <color name="bell_widget_border">#E2E4E9</color>
+    <color name="bell_widget_title">#14161A</color>
+    <color name="bell_widget_body">#2A2D34</color>
+    <color name="bell_widget_secondary">#7A7F8A</color>
+
+    <!-- Wash-tower grid cell colors (mirror the web app's zone palette). -->
+    <color name="bell_cell_men_bg">#DBEAFE</color>
+    <color name="bell_cell_men_border">#60A5FA</color>
+    <color name="bell_cell_men_text">#1E40AF</color>
+    <color name="bell_cell_common_bg">#EDE9FE</color>
+    <color name="bell_cell_common_border">#A78BFA</color>
+    <color name="bell_cell_common_text">#5B21B6</color>
+    <color name="bell_cell_women_bg">#FFE4E6</color>
+    <color name="bell_cell_women_border">#FB7185</color>
+    <color name="bell_cell_women_text">#9F1239</color>
+    <color name="bell_cell_busy_bg">#F1F3F6</color>
+    <color name="bell_cell_busy_border">#D9DDE3</color>
+    <color name="bell_cell_busy_text">#6B7280</color>
+    <color name="bell_cell_error_bg">#FFEDD5</color>
+    <color name="bell_cell_error_border">#FB923C</color>
+    <color name="bell_cell_error_text">#9A3412</color>
+    <color name="bell_cell_other_text">#7A7F8A</color>
+</resources>

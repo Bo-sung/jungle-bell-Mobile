@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Jungle Bell</string>
+    <string name="title_activity_main">Jungle Bell</string>
+    <string name="package_name">com.junglebell.mobile</string>
+    <string name="custom_url_scheme">com.junglebell.mobile</string>
+    <string name="widget_meals_title">식단</string>
+    <string name="widget_meals_description">오늘 중식·석식을 홈 화면에 표시합니다. 급식이 없는 날은 휴무로 표시됩니다. 30분마다 갱신됩니다.</string>
+    <string name="widget_laundry_title">세탁</string>
+    <string name="widget_laundry_description">세탁기·건조기 사용 가능 대수와 남은 시간을 홈 화면에 표시합니다. 30분마다 갱신됩니다.</string>
+    <string name="widget_laundry_detail_title">세탁</string>
+    <string name="widget_laundry_detail_description">세탁기·건조기 기계별 상태(남은 시간)를 홈 화면에 표시합니다. 30분마다 갱신됩니다.</string>
+    <string name="widget_wash_tower_title">워시타워</string>
+    <string name="widget_wash_tower_description">워시타워 9대의 세탁기·건조기 상태표를 앱과 같은 그림으로 홈 화면에 표시합니다. 30분마다 갱신됩니다.</string>
+    <string name="widget_wash_tower_device">기기</string>
+    <string name="widget_wash_tower_dryer">건조기</string>
+    <string name="widget_wash_tower_washer">세탁기</string>
+    <string name="widget_attendance_title">출석</string>
+    <string name="widget_attendance_description">아침·저녁 출석 여부를 홈 화면에 표시합니다. 앱에서 PC와 연결(페어링)해야 표시됩니다.</string>
+</resources>

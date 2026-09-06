@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the web app background token (dark theme):
+         oklch(0.19 0.012 145). -->
+    <color name="bell_webview_background">#141A16</color>
+</resources>
