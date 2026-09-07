@@ -2,103 +2,114 @@
   <img src="docs/assets/readme/logo.png" width="96" alt="Jungle Bell">
 </p>
 
-<h1 align="center">Jungle Bell</h1>
+<h1 align="center">Jungle Bell — Mobile 포크</h1>
 
 <p align="center">
-  크래프톤 정글의 생활 정보를 어디서나 편하게 확인하세요.
+  <a href="https://github.com/YangSiJun528/jungle-bell"><strong>원본 저장소는 여기</strong></a>를 확인해 주세요.
 </p>
 
-<div align="center">
-  <a href="https://github.com/YangSiJun528/jungle-bell/releases"><img src="https://img.shields.io/github/v/release/YangSiJun528/jungle-bell?include_prereleases" alt="GitHub Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/YangSiJun528/jungle-bell" alt="License"></a>
-  <a href="https://github.com/YangSiJun528/jungle-bell"><img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey" alt="Platform"></a>
-</div>
+> [!IMPORTANT]
+> 이 저장소는 [YangSiJun528/jungle-bell](https://github.com/YangSiJun528/jungle-bell)의 포크입니다.
+> 프로젝트의 원래 정보(데스크톱 앱, 웹/PWA, 서버, 배포, 라이선스 등)는 **원본 저장소 README**를 참고하세요.
+> 이 포크에는 원본에 없는 **Android 네이티브 앱과 홈 화면 위젯**이 추가되어 있습니다.
+> (`android-app` 브랜치 — `main`은 원본과 동기화 상태)
 
-## 주요 기능
+## 이 포크에서 추가된 것
 
-- **출석:** PC 앱이 Jungle Campus 출석 상태를 확인하고 PC와 연결된 PWA 앱에 동기화합니다.
-- **세탁실:** 세탁기·건조기의 사용 가능 여부, 남은 시간과 예상 종료 시각을 확인합니다.
-- **식단:** 오늘의 중식·석식, 이번 주 식단표와 최근 식단 기록을 확인합니다.
-- **알림:** 출석 시간대·식사 시간·세탁 종료 또는 사용 가능 시점에 맞춰 알려 주어 필요한 확인을 놓치지 않게 합니다.
+기존 React 웹 앱(PWA)을 그대로 재사용하는 **Capacitor 기반 Android 앱**과, 네이티브 Kotlin으로 구현한 **홈 화면 위젯 5종**입니다.
 
-## 실제 화면
+| 구성 | 설명 |
+|---|---|
+| 앱 본체 | Capacitor WebView가 프로덕션 웹앱을 로드. 앱 기능(페어링, 알림, 세탁, 식단, 출석)은 웹 코드와 100% 동일 |
+| 홈 화면 위젯 | 네이티브(Kotlin + RemoteViews). 30분 주기 WorkManager 동기화 + 로컬 캐시 |
 
-<table>
-  <tr>
-    <td width="33%" align="center">
-      <img src="docs/assets/readme/desktop-home.png" alt="PC 앱에서 출석 상태와 오늘 필요한 정보를 확인하는 화면">
-    </td>
-    <td width="33%" align="center">
-      <img src="docs/assets/readme/desktop-laundry.png" alt="PC 화면에서 세탁기와 건조기의 사용 가능 여부를 확인하는 화면">
-    </td>
-    <td width="33%" align="center">
-      <img src="docs/assets/readme/desktop-meals.png" alt="PC 화면에서 오늘의 식단과 최근 기록을 확인하는 화면">
-    </td>
-  </tr>
-  <tr>
-    <td align="center"><sub>출석</sub></td>
-    <td align="center"><sub>세탁실</sub></td>
-    <td align="center"><sub>식단</sub></td>
-  </tr>
-</table>
+### 위젯 기능
 
-## 설치
+| 위젯 | 크기 | 내용 | 데이터 원천 |
+|---|---|---|---|
+| 식단 | 2×2 | 오늘 메뉴 **사진 배너** + 중식/석식 텍스트, 메뉴가 없으면 "오늘 휴무" | 공개 API (`/api/public/meals`) |
+| 세탁 | 2×2 | 세탁기·건조기 요약 (사용 가능/사용 중/예상 종료) | 공개 API (`/api/public/laundry`) |
+| 세탁 상세 | 4×2 | 기기별 남은 시간 9줄 상세 | 공개 API (`/api/public/laundry`) |
+| 워시타워 | 4×1 | 세탁탑 9열 그리드 색상 그림 (구역별 색) | 공개 API (`/api/public/laundry`) |
+| 출석 | 2×2 | 앱의 "오늘 출석" 카드와 동일한 구성 — 학습 시작/종료 완료·미완료 체크 셀 + 마지막 동기화 시각 | 페어링 세션 쿠키 (`/api/me/attendance`) |
 
-각 운영체제에 맞는 명령어를 수행해 주세요.
+- **식단/세탁 위젯은 공개 API만 사용**하므로 PC(서버)가 꺼져 있어도 마지막 캐시로 계속 동작합니다.
+- **출석 위젯만 개인 데이터**라 앱에서 PC와 페어링(`__Host-jb_device` 쿠키)이 필요합니다. 미페어링 시 "앱에서 PC와 연결" 안내가 표시됩니다.
+- 식단 사진은 동기화 시 720px로 다운스케일해 미디어 해시 이름으로 캐시하므로, 같은 사진은 재다운로드되지 않습니다.
 
-만약 PC 앱 수동 설치를 원하는 경우 [최신 Release](https://github.com/YangSiJun528/jungle-bell/releases/latest)를 확인하세요.
+### 앱 측 Android 전용 처리
 
-### macOS
+- 상태바/제스처바 겹침 해결: 콘텐츠 프레임에 시스템바 인셋 패딩 적용 + 하단 네비 safe-area를 네이티브 측정값으로 JS 주입
+- 러버밴드 오버스클 비활성화로 fixed 하단 네비가 스크롤 시 밀리지 않음
+- 앱 아이콘/알림 아이콘을 실제 로고로 교체, 다크 모드 WebView 배경 대응
+- 네이티브 알림 테스트 버튼(앱 내)으로 Android 알림 파이프라인 확인 가능
 
-아래 명령어를 터미널에서 실행해 Jungle Bell을 설치하세요.
+## Android 설치 방법
+
+### 방법 A — APK 직접 설치 (가장 간단)
+
+릴리스가 준비되기 전이라면 소스에서 빌드한 APK를 전달받아 설치하면 됩니다.
+설치 시 "출처를 알 수 없는 앱" 허용이 필요합니다.
+
+### 방법 B — 소스에서 빌드
+
+**요구 사항:** Node.js 20+, JDK 21, Android SDK (Platform 36), 실기기 또는 에뮬레이터
 
 ```bash
-curl -fsSL https://install.sijun-yang.com/jungle-bell.sh/latest | sh
+# 1. 웹 에셋 빌드 (frontend/ 기준)
+npm ci
+npm run build
+
+# 2. Android 프로젝트 동기화 (첫 빌드 전 1회)
+npx cap sync android
+
+# 3. 빌드 + 기기 설치
+cd android
+./gradlew :app:installDebug        # macOS/Linux
+gradlew.bat :app:installDebug      # Windows
 ```
 
-### Windows
+- `android/local.properties`는 머신별 값(SDK 경로 등)이라 커밋되지 않습니다. Android Studio로 프로젝트를 열면 자동 생성됩니다.
+- 디버그 서명으로 바로 설치되며, 앱 실행 후 앱 안에서 PC와 페어링하면 출석 위젯도 활성화됩니다.
 
-아래 명령어를 PowerShell에서 실행해 Jungle Bell을 설치하세요.
+## iPhone 빌드 방법 (및 인증서 관련)
 
-```powershell
-irm https://install.sijun-yang.com/jungle-bell.ps1/latest | iex
+iOS 빌드는 **macOS + Xcode**가 필수입니다. (Capacitor iOS 플랫폼 특성)
+
+### 작업 현황과 남은 일
+
+- `npx cap add ios`로 플랫폼을 추가한 뒤, Android에서 한 처리를 iOS에도 이식해야 합니다.
+  - WKWebView JS 주입(`WKUserScript`) — standalone 모드 스푸프, PushManager 스텁
+  - 홈 화면 위젯 5종 — **WidgetKit(Swift)으로 재구현 필요** (Kotlin 로직을 1:1 이식). 이게 주요 작업량입니다.
+- 보너스: iOS WKWebView는 16.4+에서 Web Push를 지원하므로, Android에서 막혔던 앱 내 푸시가 기존 서버 Web Push(VAPID) 파이프라인으로 동작할 가능성이 있습니다.
+
+### 인증서/배포 — 핵심 제약
+
+| 방식 | 비용 | 유효 기간 | 대상 | 비고 |
+|---|---|---|---|---|
+| **Apple Developer Program + TestFlight** | **$99/년** | 빌드당 **90일** | 외부 테스터 100명 | 자동 업데이트, 기관/단체 배포의 사실상 유일한 실용 경로 |
+| **무료 개인 계정 사이드로드** | 0원 | **7일** | Apple ID당 기기 3대 | 매주 재서명 필요 (아래 참고) |
+| Enterprise ($299/년) | $299 | 1년 | 조직 내부 | 교육기관 자격 심사가 까다로워 현실적으로 어려움 |
+
+**무료(7일) 사이드로드를 고른다면:**
+
+- Xcode로 직접 설치하면 **7일마다 수동 재서명**이 필요합니다.
+- **AltStore/AltServer**를 쓰면 맥이 켜져 있고 아이폰이 같은 네트워크에 도달 가능할 때 **자동 재서명**됩니다(셀프 힐링). 조건이 안 맞는 날은 앱·위젯이 비활성화되었다가 다음 재시도 때 복구됩니다.
+- 앱 데이터는 재서명 시 보존됩니다.
+
+**정리:** 개인 1~3대 용도면 무료 사이드로드로 충분하고, 여러 명에게 배포(예: 교육기관 내부 전달)하려면 TestFlight($99/년)가 유일하게 현실적입니다. PWA(홈 화면 추가)는 0원이지만 홈 화면 위젯은 제공되지 않습니다.
+
+### 빌드 절차 (원격 맥 기준)
+
+```bash
+git clone <이 포크> && cd jungle-bell-Mobile/frontend
+npm ci && npm run build
+npx cap sync ios        # ios/ 플랫폼이 커밋되어 있어야 함 (현재 미추가)
+open ios/App.xcworkspace  # Xcode에서 서명 팀 선택 후 Cmd+R
 ```
 
-### 웹/PWA
-
-웹·PWA는 [jungle-bell.sijun-yang.com](https://jungle-bell.sijun-yang.com/)에서 바로 사용할 수 있습니다.
-
-## 동작 방식
-
-```mermaid
-flowchart LR
-    Campus["Jungle Campus"] <-->|"로그인·출석 확인"| PC["PC 앱"]
-    Sources["급식·세탁 공개 데이터"] --> Server["Jungle Bell 서버<br/>수집 · 동기화 · 알림"]
-    PC -->|"정규화한 출석 상태"| Server
-    Server -->|"공개 생활 정보"| Web["일반 웹"]
-    Server -->|"출석·설정 동기화<br/>Web Push"| PWA["설치형 PWA"]
-```
-
-- PC 앱은 Jungle Campus에서 출석 상태를 확인해 서버와 동기화합니다.
-- 일반 웹은 로그인 없이 공개 급식·세탁 정보를 조회합니다.
-- 설치형 PWA는 연결된 PC가 동기화한 출석 상태와 개인 알림을 받습니다.
-- PC 앱이 종료되거나 컴퓨터가 잠자기 상태면 출석 정보가 갱신되지 않습니다.
-
-## 피드백 주기
-
-> [!CAUTION]
-> Jungle Bell은 크래프톤 정글 공식 앱이 아니며 자동 출석 기능을 제공하지 않습니다.
-
-[버그 제보](https://github.com/YangSiJun528/jungle-bell/issues/new?template=bug.yml) · [기능 개선](https://github.com/YangSiJun528/jungle-bell/issues/new?template=feature_request.yml) · [질문](https://github.com/YangSiJun528/jungle-bell/issues/new?template=question.yml)
-
-## 기여하기
-
-[기여 안내](CONTRIBUTING.md)를 확인해 주세요.
-
-## 개인정보 처리방침
-
-[웹에서 확인하기](https://jungle-bell.sijun-yang.com/#/privacy)
+시그니처 이슈 요약: 무료 팀은 7일 만료 + 기기 3대 제한, 유료 팀은 90일(TestFlight) + 100대. 자세한 트레이드오프는 위 표 참고.
 
 ## 라이선스
 
-[Apache License 2.0](LICENSE)
+원본 저장소의 라이선스를 따릅니다.
