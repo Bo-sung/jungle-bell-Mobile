@@ -45,6 +45,13 @@ data class MealsData(
     val recentMenus: List<MealPost> = emptyList(),
 )
 
+data class MealImage(
+    val postId: String = "",
+    val url: String = "",
+    val sha: String? = null,
+    val extension: String? = null,
+)
+
 data class MealPost(
     val id: String = "",
     val kind: String? = null,
@@ -52,6 +59,7 @@ data class MealPost(
     val text: String = "",
     val publishedAt: String? = null,
     val firstSeenAt: String? = null,
+    val images: List<MealImage> = emptyList(),
 )
 
 /**

@@ -2,6 +2,7 @@ package com.junglebell.mobile.widget
 
 import android.content.Context
 import androidx.work.CoroutineWorker
+import java.time.Instant
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -27,6 +28,16 @@ class WidgetSyncWorker(appContext: Context, params: WorkerParameters) :
             val previous = WidgetDataStore.load(applicationContext)
             val laundry = runCatching { client.laundry() }.getOrNull()
             val meals = runCatching { client.meals() }.getOrNull()
+
+            // Fetch today's meal photos for the meal widget image. Cached by
+            // media sha, so a sync on an unchanged day costs nothing.
+            meals?.let { snapshot ->
+                MealParser.todayMeals(snapshot, Instant.now()).forEach { meal ->
+                    meal.images.firstOrNull()?.let { image ->
+                        MealImageStore.ensureDownloaded(applicationContext, image)
+                    }
+                }
+            }
 
             // Attendance is personal: only fetch it when the in-app WebView
             // holds a mobile session cookie (user paired with their PC).

@@ -23,4 +23,10 @@
     <color name="bell_cell_error_border">#FB923C</color>
     <color name="bell_cell_error_text">#9A3412</color>
     <color name="bell_cell_other_text">#7A7F8A</color>
+
+    <!-- Attendance check cells (mirror the in-app 오늘 출석 card). -->
+    <color name="bell_attendance_ok_bg">#1A10B981</color>
+    <color name="bell_attendance_ok_text">#065F46</color>
+    <color name="bell_attendance_pending_bg">#1AF59E0B</color>
+    <color name="bell_attendance_pending_text">#78350F</color>
 </resources>

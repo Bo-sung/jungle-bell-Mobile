@@ -38,6 +38,19 @@
             tools:text="9/6(일)" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/ivMealImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:src="@tools:sample/backgrounds" />
+
     <TextView
         android:id="@+id/tvMealLine1"
         android:layout_width="match_parent"

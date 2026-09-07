@@ -35,28 +35,86 @@
             android:textColor="@color/bell_widget_secondary"
             android:textSize="11sp"
             android:maxLines="1"
-            tools:text="9/6(일)" />
+            tools:text="9/7" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvAttendanceLine1"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="@color/bell_widget_body"
-        android:textSize="12sp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        tools:text="아침 ✓ · 저녁 –" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="5dp">
+
+        <!-- No-data state: a single centered hint (pairing / cohort). -->
+        <LinearLayout
+            android:id="@+id/attendanceHintBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvAttendanceHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/bell_widget_body"
+                android:textSize="13sp"
+                android:maxLines="2"
+                tools:text="앱에서 PC와 연결" />
+        </LinearLayout>
+
+        <!-- Data state: morning/evening check cells, mirroring the in-app
+             "오늘 출석" card (학습 시작 / 학습 종료, 완료/미완료). -->
+        <LinearLayout
+            android:id="@+id/attendanceDataBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvAttendanceCellMorning"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="3dp"
+                    android:background="@drawable/bell_attendance_cell_ok"
+                    android:gravity="center"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="@color/bell_attendance_ok_text"
+                    android:textSize="11sp"
+                    tools:text="✓ 학습 시작&#10;완료" />
+
+                <TextView
+                    android:id="@+id/tvAttendanceCellEvening"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="3dp"
+                    android:background="@drawable/bell_attendance_cell_pending"
+                    android:gravity="center"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="@color/bell_attendance_pending_text"
+                    android:textSize="11sp"
+                    tools:text="✗ 학습 종료&#10;미완료" />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/tvAttendanceLine2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="4dp"
         android:textColor="@color/bell_widget_secondary"
         android:textSize="11sp"
         android:maxLines="1"
         android:ellipsize="end"
-        tools:text="13:05 기준" />
+        tools:text="마지막 동기화 12:30" />
 </LinearLayout>

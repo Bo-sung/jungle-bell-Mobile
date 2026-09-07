@@ -53,7 +53,7 @@ interface PublicApiClient {
             .add(KotlinJsonAdapterFactory())
             .build()
 
-        private val httpClient: OkHttpClient = OkHttpClient.Builder()
+        val httpClient: OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .build()
