@@ -43,7 +43,10 @@ jobs:
 
       - name: 디버그 APK 빌드
         working-directory: frontend/android
-        run: ./gradlew :app:assembleDebug --no-daemon
+        run: |
+          # Windows에서 커밋된 경우 실행 비트가 누락될 수 있다.
+          chmod +x ./gradlew
+          ./gradlew :app:assembleDebug --no-daemon
 
       - name: APK 이름 정리
         run: |
