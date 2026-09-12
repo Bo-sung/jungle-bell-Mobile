@@ -1,0 +1,90 @@
+name: Android APK
+
+run-name: Android APK 빌드 (${{ github.sha }})
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: 웹 에셋 빌드 + Capacitor 동기화
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run android:sync
+
+      - name: 디버그 APK 빌드
+        working-directory: frontend/android
+        run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: APK 이름 정리
+        run: |
+          cp frontend/android/app/build/outputs/apk/debug/app-debug.apk \
+            JungleBell-android-debug.apk
+
+      - name: 아티팩트 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: JungleBell-android-debug
+          path: JungleBell-android-debug.apk
+
+      - name: 릴리스(android-latest)에 APK 게시
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          BUILD_TIME="$(date -u '+%Y-%m-%d %H:%M UTC')"
+          NOTES=$(cat <<EOF
+          \`main\`에서 자동 빌드한 디버그 서명 APK입니다.
+
+          - 빌드: ${BUILD_TIME}
+          - 커밋: ${SHA}
+
+          ### 설치 방법
+          1. 아래 \`JungleBell-android-debug.apk\`를 폰으로 내려받기
+          2. 파일을 열어 설치 ("알 수 없는 앱 설치" 허용 필요)
+          3. 앱에서 PC와 페어링하면 출석 위젯도 활성화됩니다
+
+          > 이전 버전 위에 그대로 덮어 설치해도 됩니다 (고정 디버그 키로 서명).
+          EOF
+          )
+          if gh release view android-latest -R "$REPO" >/dev/null 2>&1; then
+            gh release upload android-latest JungleBell-android-debug.apk --clobber -R "$REPO"
+            gh release edit android-latest --title "Android APK (latest)" --notes "$NOTES" -R "$REPO"
+          else
+            gh release create android-latest JungleBell-android-debug.apk \
+              --prerelease \
+              --title "Android APK (latest)" \
+              --notes "$NOTES" \
+              --target "$SHA" \
+              -R "$REPO"
+          fi

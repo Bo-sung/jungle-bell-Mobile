@@ -17,7 +17,26 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // 고정 디버그 키스토어(리포에 커밋됨, 표준 android/android 자격 증명): CI 빌드와
+    // 로컬 빌드·이미 설치된 앱이 같은 서명을 갖도록 해서 APK 업데이트를
+    // 삭제/재설치 없이 덮어 설치할 수 있게 한다.
+    signingConfigs {
+        debug {
+            def ksFile = file('debug.keystore')
+            if (ksFile.exists()) {
+                storeFile ksFile
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
+        }
+    }
     buildTypes {
+        debug {
+            if (file('debug.keystore').exists()) {
+                signingConfig signingConfigs.debug
+            }
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
