@@ -4,6 +4,7 @@ import java.security.MessageDigest
 import java.time.Instant
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -182,8 +183,83 @@ object RawLaundrySource {
             .put("final", true)
             .put("quality", quality)
             .put("machines", machines)
-            .put("capacity", JSONObject.NULL)
+            .put("capacity", capacityJson(normalize(root, now)))
             .toString()
+    }
+
+    /**
+     * 서버 PublicDataService.capacity와 동일한 규칙의 시작 가능 횟수 계산.
+     * 6·7번은 공용 구역이라 남성·여성 양쪽에 모두 산입된다.
+     */
+    private fun capacityJson(snapshot: PublicLaundrySnapshot): JSONObject {
+        val basis = "WASHER_AND_DRYER_HEADROOM_60_MIN"
+        return JSONObject()
+            .put("basis", basis)
+            .put("men", capacityEstimateJson(snapshot, "men"))
+            .put("women", capacityEstimateJson(snapshot, "women"))
+    }
+
+    private fun machineNumber(id: String): Int? =
+        Regex("(?:워시타워[_\\s-]*)?(\\d+)$").find(id.trim())?.groupValues?.get(1)?.toIntOrNull()
+
+    private fun zoneMatches(id: String, access: String): Boolean {
+        val number = machineNumber(id) ?: return false
+        return number in 6..7 || (if (access == "men") number in 1..5 else number in 8..9)
+    }
+
+    private fun available(appliance: LaundryAppliance?): Boolean =
+        appliance != null && appliance.operationalStatus == "IDLE" && appliance.projection?.status == "IDLE"
+
+    private fun dryerWithinHour(appliance: LaundryAppliance?): Boolean {
+        appliance ?: return false
+        if (appliance.operationalStatus == "ERROR" ||
+            appliance.projection?.status in setOf("PAUSED", "AWAITING_COMPLETION_CONFIRMATION", "UNKNOWN")
+        ) {
+            return false
+        }
+        val remaining = appliance.projection?.remainingMinutes ?: return false
+        return remaining in 0..60 &&
+            (appliance.operationalStatus == "RUNNING" ||
+                appliance.projection.status in setOf("OBSERVED", "ESTIMATED_RUNNING"))
+    }
+
+    private fun pendingDryer(appliance: LaundryAppliance?): Boolean {
+        appliance ?: return false
+        if (available(appliance) || appliance.operationalStatus == "ERROR") return false
+        val projection = appliance.projection ?: return false
+        if (appliance.operationalStatus !in setOf("RUNNING", "COURSE_RUNNING", "PAUSED", "SCHEDULED") &&
+            projection.status !in setOf("OBSERVED", "ESTIMATED_RUNNING", "AWAITING_COMPLETION_CONFIRMATION", "PAUSED")
+        ) {
+            return false
+        }
+        if (appliance.operationalStatus in setOf("PAUSED", "SCHEDULED") ||
+            projection.status in setOf("PAUSED", "AWAITING_COMPLETION_CONFIRMATION")
+        ) {
+            return true
+        }
+        return projection.remainingMinutes == null || projection.remainingMinutes <= 60
+    }
+
+    private fun capacityEstimateJson(snapshot: PublicLaundrySnapshot, access: String): JSONObject {
+        val accessible = snapshot.machines.filter { zoneMatches(it.id, access) }
+        val required = if (access == "men") (1..7).toList() else (6..9).toList()
+        val complete = required.all { number ->
+            snapshot.machines.any { machineNumber(it.id) == number && it.washer != null && it.dryer != null }
+        }
+        val washerAvailable = accessible.count { available(it.washer) }
+        val projectedDryerSupply = accessible.count { available(it.dryer) || dryerWithinHour(it.dryer) }
+        val pendingDryerLoads = accessible.count { pendingDryer(it.washer) }
+        val dryerHeadroom = max(0, projectedDryerSupply - pendingDryerLoads)
+        // 항상 신선한 직접 조회 결과라면 collection=SUCCESS, REFRESH_OBSERVED가 보장된다.
+        val reliable = complete
+        return JSONObject()
+            .put("access", access)
+            .put("washerAvailable", washerAvailable)
+            .put("projectedDryerSupply", projectedDryerSupply)
+            .put("pendingDryerLoads", pendingDryerLoads)
+            .put("dryerHeadroom", dryerHeadroom)
+            .put("startableLoads", if (reliable) min(washerAvailable, dryerHeadroom) else JSONObject.NULL)
+            .put("reliable", reliable)
     }
 
     private fun applianceJson(machineId: String, kind: String, raw: JSONObject, now: Instant): JSONObject {
