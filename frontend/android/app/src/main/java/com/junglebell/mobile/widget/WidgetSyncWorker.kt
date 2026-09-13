@@ -2,6 +2,7 @@ package com.junglebell.mobile.widget
 
 import android.content.Context
 import androidx.work.CoroutineWorker
+import com.junglebell.mobile.LaundryWatchManager
 import java.time.Instant
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -35,11 +36,13 @@ class WidgetSyncWorker(appContext: Context, params: WorkerParameters) :
             val customSource = LaundrySourceStore.url(applicationContext)
             var laundry: PublicLaundrySnapshot? = null
             var laundrySourceError = false
+            var usedDirectLaundrySource = false
             if (customSource != null) {
                 laundry = runCatching {
                     RawLaundrySource.resolveAndFetch(customSource, PublicApiClient.httpClient)?.snapshot
                 }.getOrNull()
                 laundrySourceError = laundry == null
+                usedDirectLaundrySource = laundry != null
             }
             if (laundry == null) {
                 laundry = runCatching { client.laundry() }.getOrNull()
@@ -87,6 +90,11 @@ class WidgetSyncWorker(appContext: Context, params: WorkerParameters) :
             LaundryDetailWidgetProvider.updateAll(applicationContext)
             WashTowerWidgetProvider.updateAll(applicationContext)
             AttendanceWidgetProvider.updateAll(applicationContext)
+            // 직접 소스에서 온 신선한 스냅샷이면 활성 감시를 보정한다
+            // (일찍 끝났으면 취소, 예상 완료가 밀리면 알람 재조정).
+            if (usedDirectLaundrySource) {
+                laundry?.let { LaundryWatchManager.syncWithSnapshot(applicationContext, it) }
+            }
             Result.success()
         } catch (e: CancellationException) {
             throw e

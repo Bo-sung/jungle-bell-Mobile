@@ -13,8 +13,8 @@ import android.content.Context
  */
 object LaundryDirectFetcher {
 
-    private const val FRESH_TTL_MS = 60_000L
-    private const val STALE_TTL_MS = 10 * 60_000L
+    private const val FRESH_TTL_MS = 5 * 60_000L
+    private const val STALE_TTL_MS = 15 * 60_000L
 
     private var cachedJson: String? = null
     private var cachedSha: String? = null

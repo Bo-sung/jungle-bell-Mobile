@@ -182,6 +182,34 @@ class MainActivity : BridgeActivity() {
         }
 
         @JavascriptInterface
+        fun getLaundryWatchesJson(): String = LaundryWatchManager.listJson(applicationContext)
+
+        @JavascriptInterface
+        fun createLaundryWatchJson(body: String): String? {
+            val json = LaundryWatchManager.createJson(applicationContext, body)
+            ensureNotificationPermission()
+            return json
+        }
+
+        @JavascriptInterface
+        fun deleteLaundryWatchJson(watchId: String) {
+            LaundryWatchManager.delete(applicationContext, watchId)
+        }
+
+        private fun ensureNotificationPermission() {
+            Handler(Looper.getMainLooper()).post {
+                if (Build.VERSION.SDK_INT >= 33 &&
+                    ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    notificationPermissionLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+
+        @JavascriptInterface
         fun sendTestNotification() {
             Handler(Looper.getMainLooper()).post {
                 if (Build.VERSION.SDK_INT >= 33 &&
@@ -285,6 +313,42 @@ class MainActivity : BridgeActivity() {
                     return m;
                   };
                 }
+              } catch (e) {}
+              try {
+                // 내 세탁 알림(감시) API를 로컬로 처리한다: 서버에 도달하지
+                // 않고, 네이티브 감시 저장소+알람이 알림을 책임진다.
+                var origFetch = window.fetch;
+                window.fetch = function (input, init) {
+                  try {
+                    var url = typeof input === 'string' ? input : (input && input.url) || '';
+                    if (url && url.indexOf('/api/me/laundry-watches') !== -1 && window.BellNative) {
+                      var method = ((init && init.method) || (input && input.method) || 'GET').toString().toUpperCase();
+                      if (method === 'GET') {
+                        var list = window.BellNative.getLaundryWatchesJson();
+                        return Promise.resolve(new Response(list || '{"watches":[]}', {
+                          status: 200,
+                          headers: {'Content-Type': 'application/json'}
+                        }));
+                      }
+                      if (method === 'POST') {
+                        var created = window.BellNative.createLaundryWatchJson(String((init && init.body) || ''));
+                        if (!created) {
+                          return Promise.resolve(new Response(JSON.stringify({message: 'LAUNDRY_SOURCE_UNAVAILABLE'}), {status: 503, headers: {'Content-Type': 'application/json'}}));
+                        }
+                        return Promise.resolve(new Response(created, {
+                          status: 201,
+                          headers: {'Content-Type': 'application/json'}
+                        }));
+                      }
+                      if (method === 'DELETE') {
+                        var parts = String(url).split('?')[0].split('/');
+                        window.BellNative.deleteLaundryWatchJson(decodeURIComponent(parts[parts.length - 1] || ''));
+                        return Promise.resolve(new Response(null, {status: 204}));
+                      }
+                    }
+                  } catch (hookError) {}
+                  return origFetch.apply(this, arguments);
+                };
               } catch (e) {}
               try {
                 if (!('PushManager' in window)) {

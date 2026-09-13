@@ -203,9 +203,32 @@ object RawLaundrySource {
             .put("startedAt", JSONObject.NULL)
             .put("estimatedFinishAt", info.finishAt ?: JSONObject.NULL)
             .put("observedAt", info.observedAt.toString())
-            .put("sessionId", JSONObject.NULL)
+            .put("sessionId", sessionIdFor(machineId, kind, raw, info) ?: JSONObject.NULL)
             .put("errorCode", info.error ?: JSONObject.NULL)
     }
+
+    /**
+     * 세버와 동일한 규칙으로 세션 식별자를 만든다. 감시 UI는 sessionId가
+     * null이면 비활성화되므로 작동 중인 기기에는 반드시 채운다. 세탁기는
+     * cycle 횟수(원천에 있음), 건조기는 작동이 이어지는 동안 이전 값을 유지한다.
+     */
+    private fun sessionIdFor(machineId: String, kind: String, raw: JSONObject, info: ApplianceInfo): String? {
+        val key = "$machineId:$kind"
+        val prev = PREVIOUS_SESSIONS[key]
+        val prevSession = prev?.substringBefore('\u0001')?.takeIf { it.isNotEmpty() }
+        val prevOperational = prev?.substringAfter('\u0001', "")
+        val value = when {
+            info.operational in setOf("IDLE", "COMPLETED") -> prevSession
+            kind == "washer" && raw.optJSONObject("cycle").let { it != null && it.has("cycleCount") } ->
+                "$machineId:washer:cycle:" + raw.optJSONObject("cycle")!!.optInt("cycleCount")
+            prevOperational == "RUNNING" && prevSession != null -> prevSession
+            else -> "$machineId:$kind:" + info.observedAt.toEpochMilli()
+        }
+        PREVIOUS_SESSIONS[key] = (value ?: "") + "\u0001" + info.operational
+        return value
+    }
+
+    private val PREVIOUS_SESSIONS = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     private fun operationalStatus(state: String?, remaining: Int, error: String?): String = when {
         state == null -> "UNKNOWN"
