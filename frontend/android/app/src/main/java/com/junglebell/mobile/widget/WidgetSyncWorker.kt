@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
 
 /**
  * Periodically fetches the public laundry/meals snapshots, caches them
@@ -26,7 +27,23 @@ class WidgetSyncWorker(appContext: Context, params: WorkerParameters) :
         return try {
             val client = PublicApiClient.instance
             val previous = WidgetDataStore.load(applicationContext)
-            val laundry = runCatching { client.laundry() }.getOrNull()
+
+            // Laundry: when the user registered a wash tower source (one-time
+            // QR scan), fetch it directly — bypassing the server entirely.
+            // On failure fall back to the server snapshot and flag the error
+            // so widgets can warn instead of silently showing old data.
+            val customSource = LaundrySourceStore.url(applicationContext)
+            var laundry: PublicLaundrySnapshot? = null
+            var laundrySourceError = false
+            if (customSource != null) {
+                laundry = runCatching {
+                    RawLaundrySource.resolveAndFetch(customSource, PublicApiClient.httpClient)?.snapshot
+                }.getOrNull()
+                laundrySourceError = laundry == null
+            }
+            if (laundry == null) {
+                laundry = runCatching { client.laundry() }.getOrNull()
+            }
             val meals = runCatching { client.meals() }.getOrNull()
 
             // Fetch today's meal photos for the meal widget image. Cached by
@@ -61,9 +78,11 @@ class WidgetSyncWorker(appContext: Context, params: WorkerParameters) :
                     meals = meals ?: previous?.meals,
                     attendance = attendance ?: previous?.attendance,
                     sessionPresent = hasMobileSession,
+                    laundrySourceError = laundrySourceError,
                 ),
             )
             MealWidgetProvider.updateAll(applicationContext)
+            MealDetailWidgetProvider.updateAll(applicationContext)
             LaundryWidgetProvider.updateAll(applicationContext)
             LaundryDetailWidgetProvider.updateAll(applicationContext)
             WashTowerWidgetProvider.updateAll(applicationContext)
@@ -91,6 +110,63 @@ class WidgetSyncWorker(appContext: Context, params: WorkerParameters) :
             val request = OneTimeWorkRequestBuilder<WidgetSyncWorker>().build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(ONE_SHOT_TAG, ExistingWorkPolicy.REPLACE, request)
+        }
+
+        private val mirrorLock = Any()
+        private var lastMealsMirrorMs = 0L
+        private var lastAttendanceMirrorMs = 0L
+        private const val MIRROR_INTERVAL_MS = 5 * 60_000L
+
+        /**
+         * Called when the in-app page refreshes its own data: mirrors the
+         * same fetch into the widget cache (rate-limited) so an in-app
+         * refresh also refreshes the home screen widgets.
+         */
+        fun mirrorMeals(context: Context) {
+            val now = System.currentTimeMillis()
+            synchronized(mirrorLock) {
+                if (now - lastMealsMirrorMs < MIRROR_INTERVAL_MS) return
+                lastMealsMirrorMs = now
+            }
+            kotlin.concurrent.thread(name = "widget-mirror-meals") {
+                val meals = runBlocking {
+                    runCatching { PublicApiClient.instance.meals() }.getOrNull()
+                } ?: return@thread
+                val appContext = context.getApplicationContext()
+                val previous = WidgetDataStore.load(appContext) ?: WidgetCache()
+                WidgetDataStore.save(
+                    appContext,
+                    previous.copy(meals = meals, updatedAt = System.currentTimeMillis()),
+                )
+                MealWidgetProvider.updateAll(appContext)
+                MealDetailWidgetProvider.updateAll(appContext)
+            }
+        }
+
+        fun mirrorAttendance(context: Context) {
+            val cookie = PublicApiClient.webViewSessionCookie()
+                ?.takeIf { it.contains("jb_device=") } ?: return
+            val now = System.currentTimeMillis()
+            synchronized(mirrorLock) {
+                if (now - lastAttendanceMirrorMs < MIRROR_INTERVAL_MS) return
+                lastAttendanceMirrorMs = now
+            }
+            kotlin.concurrent.thread(name = "widget-mirror-attendance") {
+                val attendance = runBlocking {
+                    runCatching { PublicApiClient.instance.attendance(cookie) }.getOrNull()
+                } ?: return@thread
+                val appContext = context.getApplicationContext()
+                val previous = WidgetDataStore.load(appContext) ?: WidgetCache()
+                WidgetDataStore.save(
+                    appContext,
+                    previous.copy(
+                        attendance = attendance,
+                        sessionPresent = true,
+                        updatedAt = System.currentTimeMillis(),
+                    ),
+                )
+                AttendanceWidgetProvider.updateAll(appContext)
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ import android.widget.RemoteViews
 import com.junglebell.mobile.R
 import java.io.File
 import java.time.Instant
+import java.time.LocalTime
 import kotlin.math.max
 
 /**
@@ -57,15 +58,20 @@ class MealWidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(R.id.tvMealLine1, View.VISIBLE)
                 views.setViewVisibility(R.id.tvMealLine2, View.GONE)
             } else {
-                meals.take(2).forEachIndexed { index, meal ->
-                    val textViewId = if (index == 0) R.id.tvMealLine1 else R.id.tvMealLine2
-                    views.setTextViewText(textViewId, formatMealLine(meal))
-                    views.setViewVisibility(textViewId, View.VISIBLE)
+                // 2x2 위젯은 지금 먹을(다음) 끼니 한 줄만 표시: 중식 시간이
+                // 지나면 석식 게시글 여부와 관계없이 석식을 우선한다.
+                val afterLunch = now.atZone(WidgetCommon.KST).toLocalTime() >=
+                    LocalTime.of(14, 0)
+                val primary = if (afterLunch) {
+                    meals.firstOrNull { MealParser.periodLabel(it.title) == "석식" }
+                        ?: meals.first()
+                } else {
+                    meals.first()
                 }
-                if (meals.size == 1) {
-                    views.setViewVisibility(R.id.tvMealLine2, View.GONE)
-                }
-                renderImage(context, views, meals)
+                views.setTextViewText(R.id.tvMealLine1, formatMealLine(primary))
+                views.setViewVisibility(R.id.tvMealLine1, View.VISIBLE)
+                views.setViewVisibility(R.id.tvMealLine2, View.GONE)
+                renderImage(context, views, listOf(primary) + (meals - primary))
             }
 
             views.setOnClickPendingIntent(R.id.mealWidgetRoot, WidgetCommon.launchIntent(context))

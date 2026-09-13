@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
@@ -13,6 +14,8 @@ import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +24,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.getcapacitor.BridgeActivity
 import com.getcapacitor.BridgeWebViewClient
+import com.junglebell.mobile.widget.LaundryDirectFetcher
+import com.junglebell.mobile.widget.WidgetSyncWorker
 
 class MainActivity : BridgeActivity() {
 
@@ -73,6 +78,33 @@ class MainActivity : BridgeActivity() {
 
         b.setWebViewClient(
             object : BridgeWebViewClient(b) {
+                override fun shouldInterceptRequest(
+                    view: WebView,
+                    request: WebResourceRequest,
+                ): WebResourceResponse? {
+                    val url = request.url
+                    if (url.host == PRODUCTION_HOST) {
+                        when (url.encodedPath) {
+                            "/api/public/laundry" -> {
+                                val json = LaundryDirectFetcher.snapshotJson(applicationContext)
+                                if (json != null) {
+                                    return WebResourceResponse(
+                                        "application/json",
+                                        "utf-8",
+                                        json.byteInputStream(),
+                                    )
+                                }
+                            }
+                            "/api/public/meals" -> {
+                                WidgetSyncWorker.mirrorMeals(applicationContext)
+                            }
+                            "/api/me/attendance" ->
+                                WidgetSyncWorker.mirrorAttendance(applicationContext)
+                        }
+                    }
+                    return super.shouldInterceptRequest(view, request)
+                }
+
                 override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                     if (!url.isNullOrEmpty() && url.startsWith(BASE_URL)) {
                         view.evaluateJavascript(PWA_STANDALONE_SPOOF, null)
@@ -87,6 +119,34 @@ class MainActivity : BridgeActivity() {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
                 if (granted) postTestNotification()
             }
+
+        handleLaundryDeepLink(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleLaundryDeepLink(intent)
+    }
+
+    /**
+     * Entry points for the one-time wash tower source registration:
+     * - `junglebell://laundry-source?url=…` QR codes (stock camera scan),
+     * - plain https links on a trycloudflare.com host scanned from the QR
+     *   posted in the laundry room (Android offers this app in the chooser).
+     * Both open the native setup screen prefilled with the candidate URL.
+     * The intent data is cleared so the WebView never navigates to it.
+     */
+    private fun handleLaundryDeepLink(intent: Intent?) {
+        val data = intent?.data ?: return
+        val candidate = when (data.scheme) {
+            "junglebell" -> data.getQueryParameter("url")
+            "https" -> data.toString()
+            else -> null
+        } ?: return
+        intent.data = null
+        if (candidate.isNotBlank()) {
+            startActivity(LaundrySourceActivity.prefillIntent(this, candidate))
+        }
     }
 
     private fun systemBarDimen(name: String): Int {
@@ -114,6 +174,13 @@ class MainActivity : BridgeActivity() {
 
     /** JS bridge for the injected "notification test" button. */
     inner class NativeBell {
+        @JavascriptInterface
+        fun openLaundrySourceSettings() {
+            Handler(Looper.getMainLooper()).post {
+                startActivity(Intent(this@MainActivity, LaundrySourceActivity::class.java))
+            }
+        }
+
         @JavascriptInterface
         fun sendTestNotification() {
             Handler(Looper.getMainLooper()).post {
@@ -161,6 +228,7 @@ class MainActivity : BridgeActivity() {
 
     companion object {
         private const val BASE_URL = "https://jungle-bell.sijun-yang.com"
+        private const val PRODUCTION_HOST = "jungle-bell.sijun-yang.com"
         private const val NOTIFICATION_CHANNEL_ID = "jungle_bell"
         private const val TEST_NOTIFICATION_ID = 1001
 
@@ -226,57 +294,63 @@ class MainActivity : BridgeActivity() {
               try {
                 var sw = navigator.serviceWorker;
                 if (sw) {
-                  var stubRegistration = null;
+                  // 앱 안에서는 서비스 워커를 쓰지 않는다. SW가 /api/public/*
+                  // fetch를 중계하면 WebView의 요청 가로채기(워시타워 직접
+                  // 소스 스왑)를 우회하고 오래된 캐시를 줄 수 있다. 푸시도
+                  // WebView에서는 불가능하므로 스텁 등록물로 대체한다.
                   var unsupportedPush = {
                     subscribe: function () {
                       return Promise.reject(new Error('PUSH_UNSUPPORTED'));
                     }
                   };
-                  var cleanRegistration = function (reg) {
-                    if (!reg) return reg;
+                  var stubRegistration = {
+                    active: null,
+                    installing: null,
+                    waiting: null,
+                    scope: '/',
+                    update: function () { return Promise.resolve(undefined); },
+                    unregister: function () { return Promise.resolve(false); },
+                    addEventListener: function () {},
+                    removeEventListener: function () {},
+                    dispatchEvent: function () { return false; },
+                    pushManager: unsupportedPush
+                  };
+                  var unregisterAll = function () {
+                    if (!sw.getRegistrations) return Promise.resolve(0);
+                    return sw
+                      .getRegistrations()
+                      .then(function (regs) {
+                        var count = regs ? regs.length : 0;
+                        return Promise
+                          .all((regs || []).map(function (r) { return r.unregister(); }))
+                          .then(function () { return count; });
+                      })
+                      .catch(function () { return 0; });
+                  };
+                  unregisterAll().then(function (count) {
                     try {
-                      Object.defineProperty(reg, 'pushManager', {
-                        configurable: true,
-                        value: unsupportedPush
-                      });
-                    } catch (e) {}
-                    return reg;
-                  };
-                  var originalRegister = sw.register.bind(sw);
-                  sw.register = function (scriptUrl, options) {
-                    return originalRegister(scriptUrl, options).then(
-                      function (reg) { return cleanRegistration(reg); },
-                      function () {
-                        if (!stubRegistration) {
-                          stubRegistration = {
-                            active: null,
-                            installing: null,
-                            navigating: null,
-                            waiting: null,
-                            scope: (options && options.scope) || '/',
-                            update: function () { return Promise.resolve(null); },
-                            uninstall: function () { return Promise.resolve(false); },
-                            pushManager: unsupportedPush
-                          };
-                        }
-                        return stubRegistration;
+                      if (count > 0 && sw.controller &&
+                          !sessionStorage.getItem('jb-sw-reload')) {
+                        sessionStorage.setItem('jb-sw-reload', '1');
+                        location.reload();
                       }
-                    );
+                    } catch (e5) {}
+                  });
+                  sw.register = function () {
+                    return Promise.resolve(stubRegistration);
                   };
-                  var readyDescriptor =
-                    Object.getOwnPropertyDescriptor(sw, 'ready') ||
-                    Object.getOwnPropertyDescriptor(Object.getPrototypeOf(sw), 'ready');
-                  if (readyDescriptor && readyDescriptor.get) {
+                  try {
                     Object.defineProperty(sw, 'ready', {
                       configurable: true,
-                      get: function () {
-                        return readyDescriptor.get.call(sw).then(
-                          cleanRegistration,
-                          function () { return stubRegistration || null; }
-                        );
-                      }
+                      get: function () { return Promise.resolve(stubRegistration); }
                     });
-                  }
+                  } catch (e6) {}
+                  try {
+                    Object.defineProperty(sw, 'controller', {
+                      configurable: true,
+                      get: function () { return null; }
+                    });
+                  } catch (e7) {}
                 }
               } catch (e) {}
               try {
@@ -309,6 +383,24 @@ class MainActivity : BridgeActivity() {
                     }, 4000);
                   });
                   document.body.appendChild(btn);
+                  var srcBtn = document.createElement('button');
+                  srcBtn.id = 'jb-native-source-btn';
+                  srcBtn.type = 'button';
+                  srcBtn.textContent = '🧺 소스 연결';
+                  srcBtn.style.cssText = [
+                    'position:fixed','right:16px','bottom:140px','z-index:2147483647',
+                    'border:1px solid rgba(255,255,255,0.16)','border-radius:9999px',
+                    'background:rgba(24,30,26,0.94)','color:#E7ECE9',
+                    'padding:10px 14px','font-size:13px','line-height:1',
+                    'font-family:inherit','letter-spacing:-0.01em',
+                    'box-shadow:0 8px 24px rgba(0,0,0,0.4)'
+                  ].join(';');
+                  srcBtn.addEventListener('click', function () {
+                    try {
+                      window.BellNative.openLaundrySourceSettings();
+                    } catch (e) {}
+                  });
+                  document.body.appendChild(srcBtn);
                 }
                 if (document.readyState === 'loading') {
                   document.addEventListener('DOMContentLoaded', addNativeTestButton, { once: true });

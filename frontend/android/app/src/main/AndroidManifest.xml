@@ -24,6 +24,17 @@
         </receiver>
 
         <receiver
+            android:name=".widget.MealDetailWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/bell_meal_detail_widget_info" />
+        </receiver>
+
+        <receiver
             android:name=".widget.LaundryWidgetProvider"
             android:exported="false">
             <intent-filter>
@@ -80,7 +91,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- 원타임 워시타워 소스 등록 진입점:
+                 1) junglebell://laundry-source?url=… QR (기본 카메라 스캔),
+                 2) 세탁실 QR에 담긴 https://*.trycloudflare.com 링크
+                    (연결 열기 선택지로 본 앱 제공). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="junglebell" android:host="laundry-source" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="*.trycloudflare.com" />
+            </intent-filter>
+
         </activity>
+
+        <activity
+            android:name=".LaundrySourceActivity"
+            android:label="워시타워 소스 연결"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

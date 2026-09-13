@@ -38,14 +38,19 @@ class LaundryWidgetProvider : AppWidgetProvider() {
             val now = Instant.now()
             views.setTextViewText(R.id.tvLaundryWidgetDate, WidgetCommon.todayLabel(now))
 
-            val snapshot = WidgetDataStore.load(context)?.laundry
+            val cache = WidgetDataStore.load(context)
+            val snapshot = cache?.laundry
             if (snapshot == null) {
                 views.setTextViewText(R.id.tvLaundryLine1, "첫 동기화 대기")
                 views.setTextViewText(R.id.tvLaundryLine2, "")
             } else {
                 val (line1, line2) = LaundrySummary.formatLines(snapshot, now)
                 views.setTextViewText(R.id.tvLaundryLine1, line1)
-                views.setTextViewText(R.id.tvLaundryLine2, line2)
+                // 직접 연결한 워시타워 소스가 끊긴 경우 이전 데이터임을 명시한다.
+                views.setTextViewText(
+                    R.id.tvLaundryLine2,
+                    if (cache.laundrySourceError) "⚠ 소스끊김 · $line2" else line2,
+                )
             }
 
             views.setOnClickPendingIntent(R.id.laundryWidgetRoot, WidgetCommon.launchIntent(context))

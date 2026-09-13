@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mealDetailWidgetRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bell_widget_background"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/widget_meals_title"
+            android:textColor="@color/bell_widget_title"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tvMealDetailWidgetDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/bell_widget_secondary"
+            android:textSize="11sp"
+            android:maxLines="1"
+            tools:text="9/13(일)" />
+    </LinearLayout>
+
+    <!-- 중식 블록 -->
+    <LinearLayout
+        android:id="@+id/mealDetailBlock1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvDetailMeal1Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/bell_widget_title"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            tools:text="중식" />
+
+        <TextView
+            android:id="@+id/tvDetailMeal1Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:lineSpacingExtra="2dp"
+            android:textColor="@color/bell_widget_body"
+            android:textSize="12sp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            tools:text="맑은돼지국밥*새우젓,다데기,잡곡밥,수제김치전,부추생채,석박지" />
+    </LinearLayout>
+
+    <!-- 석식 블록 -->
+    <LinearLayout
+        android:id="@+id/mealDetailBlock2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvDetailMeal2Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/bell_widget_title"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            tools:text="석식" />
+
+        <TextView
+            android:id="@+id/tvDetailMeal2Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:lineSpacingExtra="2dp"
+            android:textColor="@color/bell_widget_body"
+            android:textSize="12sp"
+            android:maxLines="3"
+            android:ellipsize="end"
+            tools:text="얼큰닭개장, 잡곡밥, 너비아니구이, 돌자반볶음, 깍두기" />
+    </LinearLayout>
+</LinearLayout>

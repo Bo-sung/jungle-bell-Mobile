@@ -89,4 +89,5 @@ data class WidgetCache(
     val meals: PublicMealsSnapshot? = null,
     val attendance: MobileAttendanceEnvelope? = null,
     val sessionPresent: Boolean = false,
+    val laundrySourceError: Boolean = false,
 )
